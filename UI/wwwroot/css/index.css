@@ -1,0 +1,43 @@
+    .jwt-visualizer {
+        border: 1px solid #dddfe2; 
+        border-radius: 6px; 
+        padding: 1rem; 
+        background-color: #f8f9fa;
+        font-family: 'Courier New', Courier, monospace;
+        word-break: break-all;
+        line-height: 1.5; 
+    }
+
+    .jwt-dot {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .jwt-header {
+        color: #d63384; 
+    }
+
+    .jwt-payload {
+        color: #800080;
+    }
+
+    .jwt-signature {
+        color: #0d6efd; 
+    }
+
+    .jwt-decoded-box {
+        background-color: #282c34;
+        color: #abb2bf;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        white-space: pre-wrap; 
+        height: 100%; 
+    }
+
+    .jwt-decoded-box h6 {
+        color: #61afef;
+        border-bottom: 1px solid #444;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }

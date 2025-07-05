@@ -1,8 +1,172 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model UI.Dtos.IndexViewDto
+@{
+    ViewData["Title"] = "Kullanıcı Bilgileri";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Hoş Geldin, @Model.UserName!</h1>
 </div>
+<hr />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-user-shield"></i> MVC Kimlik Doğrulama Bilgileri (Auth Cookie)</h5>
+            </div>
+            <div class="card-body">
+                <p>Bu bilgiler, UI uygulamasının sizi tanımasını sağlayan şifreli Authentication Cookie'den gelir. Bu cookie sayesinde sayfalar arasında gezinirken tekrar tekrar login olmanız gerekmez.</p>
+                <table class="table table-striped table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Claim Türü (Type)</th>
+                            <th>Değer (Value)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model.MvcAuthClaims)
+                        {
+                            <tr>
+                                <td><code>@claim.Type</code></td>
+                                <td>@claim.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-key"></i> JWT Token Bilgileri (API Anahtarları)</h5>
+            </div>
+            <div class="card-body">
+                <p>Bu token'lar, API ile güvenli bir şekilde konuşmak için kullanılır. Access Token kısa ömürlüdür, Refresh Token ise yenisini almak için kullanılır.</p>
+
+                <div class="alert alert-info"
+                     id="expiration-status"
+                     data-expiration-iso="@Model.AccessTokenExpirationISO">
+                    <strong>Durum:</strong>
+                    <span id="countdown-timer">@Model.ExpirationMessage</span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label><strong>Access Token (Kısa Ömürlü)</strong></label>
+                    @if (!string.IsNullOrEmpty(Model.AccessToken))
+                    {
+                        <div id="accessTokenVisualizer" class="jwt-visualizer" data-token="@Model.AccessToken">
+                            <p>
+                                <span id="jwt-header-part" class="jwt-header"></span>
+                                <span class="jwt-dot">.</span>
+                                <span id="jwt-payload-part" class="jwt-payload"></span>
+                                <span class="jwt-dot">.</span>
+                                <span id="jwt-signature-part" class="jwt-signature"></span>
+                            </p>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="jwt-decoded-header" class="jwt-decoded-box"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="jwt-decoded-payload" class="jwt-decoded-box"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="jwt-visualizer">Token bulunmuyor.</div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="refreshToken"><strong>Refresh Token (Uzun Ömürlü)</strong></label>
+                    <textarea id="refreshToken" class="form-control" rows="3" readonly>@Model.RefreshToken</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const statusContainer = document.getElementById('expiration-status');
+            if (statusContainer) {
+                const countdownTimerElement = document.getElementById('countdown-timer');
+                const expirationISO = statusContainer.dataset.expirationIso;
+
+                if (expirationISO) {
+                    const expirationDate = new Date(expirationISO);
+                    const timer = setInterval(function () {
+                        const now = new Date();
+                        const difference = expirationDate - now;
+
+                        if (difference <= 0) {
+                            clearInterval(timer);
+                            countdownTimerElement.textContent = "Access Token'ın süresi doldu! Bir sonraki API isteğinde yenilenecek.";
+                            statusContainer.classList.remove('alert-info');
+                            statusContainer.classList.add('alert-danger');
+                            return;
+                        }
+
+                        const minutes = Math.floor((difference / 1000 / 60) % 60);
+                        const seconds = Math.floor((difference / 1000) % 60);
+                        const displaySeconds = seconds < 10 ? '0' + seconds : seconds;
+                        countdownTimerElement.textContent = `Access Token'ın süresinin dolmasına: ${minutes} dakika, ${displaySeconds} saniye kaldı.`;
+
+                    }, 1000);
+                }
+            }
+
+            function visualizeJwt() {
+                const visualizerElement = document.getElementById('accessTokenVisualizer');
+                if (!visualizerElement) return;
+
+                const accessTokenValue = visualizerElement.dataset.token;
+                if (!accessTokenValue || accessTokenValue.split('.').length !== 3) return;
+
+                const headerPartEl = document.getElementById('jwt-header-part');
+                const payloadPartEl = document.getElementById('jwt-payload-part');
+                const signaturePartEl = document.getElementById('jwt-signature-part');
+                const decodedHeaderEl = document.getElementById('jwt-decoded-header');
+                const decodedPayloadEl = document.getElementById('jwt-decoded-payload');
+
+                const [header, payload, signature] = accessTokenValue.split('.');
+
+                headerPartEl.textContent = header;
+                payloadPartEl.textContent = payload;
+                signaturePartEl.textContent = signature;
+
+                try {
+                    function decodeJwtPart(str) {
+                        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+                        while (base64.length % 4) {
+                            base64 += '=';
+                        }
+                        return decodeURIComponent(atob(base64).split('').map(function(c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(''));
+                    }
+
+                    const decodedHeader = JSON.stringify(JSON.parse(decodeJwtPart(header)), null, 2);
+                    const decodedPayload = JSON.stringify(JSON.parse(decodeJwtPart(payload)), null, 2);
+
+                    decodedHeaderEl.innerHTML = `<h6>Decoded Header</h6><pre><code>${decodedHeader}</code></pre>`;
+                    decodedPayloadEl.innerHTML = `<h6>Decoded Payload (Claims)</h6><pre><code>${decodedPayload}</code></pre>`;
+
+                } catch (e) {
+                    console.error("JWT parse error:", e);
+                    decodedHeaderEl.innerHTML = `<h6>Decoded Header</h6><p>Header decode edilemedi.</p>`;
+                    decodedPayloadEl.innerHTML = `<h6>Decoded Payload (Claims)</h6><p>Payload decode edilemedi.</p>`;
+                }
+            }
+
+            visualizeJwt();
+        });
+    </script>
+}
