@@ -5,7 +5,9 @@ This project is a starter kit that demonstrates JWT (JSON Web Token) based authe
 
 ## 🚀 Purpose & Key Features
 
-This project aims to establish a secure authentication flow between a client and a server. The API generates an `Access Token` and a `Refresh Token` upon successful login. The client (UI) uses these tokens to access protected resources. When the `Access Token` expires, the `Refresh Token` is used to silently obtain a new one without requiring the user to log in again.
+This project aims to establish a secure authentication flow between a client and a server. The API generates an `Access Token` and a `Refresh Token` upon successful login. The client (UI) uses these tokens to access protected resources. When the `Access Token` expires, the `Refresh Token` is used to silently obtain a new one without requiring the user to log in again. To provide a clearer understanding of this process, the main page of the UI project (`Index.cshtml`) visually breaks down the contents of the JWT and tracks its lifecycle, as shown below.
+
+![JWT Visualization on Index Page](img/auth_img1.png)
 
 ### ✨ Highlights
 

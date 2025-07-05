@@ -1,10 +1,10 @@
 ﻿@model UI.Dtos.IndexViewDto
 @{
-    ViewData["Title"] = "Kullanıcı Bilgileri";
+    ViewData["Title"] = "User Information";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Hoş Geldin, @Model.UserName!</h1>
+    <h1 class="display-4">Welcome, @Model.UserName!</h1>
 </div>
 <hr />
 
@@ -12,15 +12,15 @@
     <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h5><i class="fas fa-user-shield"></i> MVC Kimlik Doğrulama Bilgileri (Auth Cookie)</h5>
+                <h5><i class="fas fa-user-shield"></i> MVC Authentication Details (Auth Cookie)</h5>
             </div>
             <div class="card-body">
-                <p>Bu bilgiler, UI uygulamasının sizi tanımasını sağlayan şifreli Authentication Cookie'den gelir. Bu cookie sayesinde sayfalar arasında gezinirken tekrar tekrar login olmanız gerekmez.</p>
+                <p>This information comes from the encrypted Authentication Cookie that allows the UI application to recognize you. Thanks to this cookie, you don't need to log in repeatedly while navigating between pages.</p>
                 <table class="table table-striped table-bordered">
                     <thead class="thead-light">
                         <tr>
-                            <th>Claim Türü (Type)</th>
-                            <th>Değer (Value)</th>
+                            <th>Claim Type</th>
+                            <th>Value</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,20 +40,20 @@
     <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header bg-success text-white">
-                <h5><i class="fas fa-key"></i> JWT Token Bilgileri (API Anahtarları)</h5>
+                <h5><i class="fas fa-key"></i> JWT Token Information (API Keys)</h5>
             </div>
             <div class="card-body">
-                <p>Bu token'lar, API ile güvenli bir şekilde konuşmak için kullanılır. Access Token kısa ömürlüdür, Refresh Token ise yenisini almak için kullanılır.</p>
+                <p>These tokens are used to communicate securely with the API. The Access Token is short-lived, while the Refresh Token is used to obtain a new one.</p>
 
                 <div class="alert alert-info"
                      id="expiration-status"
                      data-expiration-iso="@Model.AccessTokenExpirationISO">
-                    <strong>Durum:</strong>
+                    <strong>Status:</strong>
                     <span id="countdown-timer">@Model.ExpirationMessage</span>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label><strong>Access Token (Kısa Ömürlü)</strong></label>
+                    <label><strong>Access Token (Short-Lived)</strong></label>
                     @if (!string.IsNullOrEmpty(Model.AccessToken))
                     {
                         <div id="accessTokenVisualizer" class="jwt-visualizer" data-token="@Model.AccessToken">
@@ -77,12 +77,12 @@
                     }
                     else
                     {
-                        <div class="jwt-visualizer">Token bulunmuyor.</div>
+                        <div class="jwt-visualizer">Token not found.</div>
                     }
                 </div>
 
                 <div class="form-group">
-                    <label for="refreshToken"><strong>Refresh Token (Uzun Ömürlü)</strong></label>
+                    <label for="refreshToken"><strong>Refresh Token (Long-Lived)</strong></label>
                     <textarea id="refreshToken" class="form-control" rows="3" readonly>@Model.RefreshToken</textarea>
                 </div>
             </div>
@@ -108,7 +108,7 @@
 
                         if (difference <= 0) {
                             clearInterval(timer);
-                            countdownTimerElement.textContent = "Access Token'ın süresi doldu! Bir sonraki API isteğinde yenilenecek.";
+                            countdownTimerElement.textContent = "Access Token has expired! It will be renewed on the next API request.";
                             statusContainer.classList.remove('alert-info');
                             statusContainer.classList.add('alert-danger');
                             return;
@@ -117,7 +117,7 @@
                         const minutes = Math.floor((difference / 1000 / 60) % 60);
                         const seconds = Math.floor((difference / 1000) % 60);
                         const displaySeconds = seconds < 10 ? '0' + seconds : seconds;
-                        countdownTimerElement.textContent = `Access Token'ın süresinin dolmasına: ${minutes} dakika, ${displaySeconds} saniye kaldı.`;
+                        countdownTimerElement.textContent = `Access Token expires in: ${minutes} minutes, ${displaySeconds} seconds.`;
 
                     }, 1000);
                 }
@@ -161,8 +161,8 @@
 
                 } catch (e) {
                     console.error("JWT parse error:", e);
-                    decodedHeaderEl.innerHTML = `<h6>Decoded Header</h6><p>Header decode edilemedi.</p>`;
-                    decodedPayloadEl.innerHTML = `<h6>Decoded Payload (Claims)</h6><p>Payload decode edilemedi.</p>`;
+                    decodedHeaderEl.innerHTML = `<h6>Decoded Header</h6><p>Could not decode header.</p>`;
+                    decodedPayloadEl.innerHTML = `<h6>Decoded Payload (Claims)</h6><p>Could not decode payload.</p>`;
                 }
             }
 
